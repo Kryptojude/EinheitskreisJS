@@ -1,0 +1,130 @@
+<!DOCTYPE HTML>
+<head>
+<style>
+td { min-width: 150px; }
+</style>
+</head>
+<body>
+<canvas id="canvas" width="1200" height="600" style="border:solid 3px red ; float:left;"></canvas>
+<table id="HUD" style="float:left; font-size:30px; margin: 10px" border="1px">
+<table/>
+
+<script>
+	class Rectangle
+	{
+		constructor(x, y, width, height)
+		{
+			this.x = x;
+			this.y = y;
+			this.width = width;
+			this.height = height;
+		}
+	}
+	
+	var canvas = document.getElementById("canvas");
+	var ctx = canvas.getContext("2d");
+	ctx.lineWidth = 5;
+	var angle = 0; // Degrees
+	var radius = 300;
+	var plotX = 0;
+		
+	var interval = setInterval(update, 20);
+	function update()
+	{
+		var cos = Math.cos(angle * Math.PI/180);
+		var sin = Math.sin(angle * Math.PI/180);
+		ctx.clearRect(0, 0, 600, 600);
+		
+		// Draw 0° line, angle
+		ctx.beginPath();
+		ctx.strokeStyle = "#000";
+		ctx.moveTo(radius, radius);
+		ctx.lineTo(radius * 2, radius);
+		ctx.arc(radius, radius, radius/4, 0, angle * Math.PI/180);
+		ctx.stroke();
+		ctx.closePath();
+		
+		// Animate degree number
+		ctx.font = "30px sans";
+		var text = angle + "°";
+		var textWidth = ctx.measureText(text).width;
+		var textHeight = 20;
+		var cutOffAngle = 60;
+		if (angle < cutOffAngle)
+		{
+			var halfAngleCos = Math.cos(cutOffAngle/2.2 * Math.PI/180);
+			var halfAngleSin = Math.sin(cutOffAngle/2.2 * Math.PI/180);
+		}
+		else
+		{
+			var halfAngleCos = Math.cos(angle/2.2 * Math.PI/180);
+			var halfAngleSin = Math.sin(angle/2.2 * Math.PI/180);
+		}
+		ctx.fillText(text, radius + halfAngleCos * radius / 8 - textWidth/2, 
+		                   radius + halfAngleSin * radius / 8 + textHeight/2);
+		
+		// Draw circle
+		ctx.beginPath();
+		ctx.arc(radius, radius, radius, 0, 2 * Math.PI);
+		ctx.stroke();
+		ctx.closePath();  
+		
+		// Draw Cosinus
+		ctx.beginPath();
+		ctx.moveTo(radius, radius);
+		ctx.lineTo(radius + cos * radius, radius);
+		ctx.strokeStyle = "#f00";
+		ctx.stroke();
+		ctx.closePath();
+		
+		// Draw Sinus
+		ctx.beginPath();
+		ctx.moveTo(radius + cos * radius, radius);
+		ctx.lineTo(radius + cos * radius, radius + sin	* radius);
+		ctx.strokeStyle = "#00f";
+		ctx.stroke();
+		ctx.closePath();  
+
+		// Draw Hypothenuse
+		ctx.beginPath();
+		ctx.moveTo(radius, radius);
+		ctx.lineTo(radius + cos * radius, radius + sin * radius);
+		ctx.strokeStyle = "#000";
+		ctx.stroke();
+		ctx.closePath();
+		
+		// Draw Waves
+		var wavesRec = new Rectangle ( 650, 10, 360, 150 );
+		ctx.strokeRect(wavesRec.x, wavesRec.y, wavesRec.width, wavesRec.height);
+		ctx.beginPath(); // x-axis
+		ctx.moveTo(wavesRec.x, wavesRec.y + wavesRec.height/2);
+		ctx.lineTo(wavesRec.x + wavesRec.width, wavesRec.y + wavesRec.height/2);
+		ctx.lineWidth = 1;
+		ctx.stroke();
+		ctx.closePath();
+		ctx.lineWidth = 5;
+		ctx.strokeStyle = "#00f";
+		ctx.strokeRect(wavesRec.x + angle, wavesRec.y + wavesRec.height/2 - sin * wavesRec.height/2.15, 1, 1);
+		ctx.strokeStyle = "#f00";
+		ctx.strokeRect(wavesRec.x + angle, wavesRec.y + wavesRec.height/2 - cos * wavesRec.height/2.15, 1, 1);
+		
+		// Draw HUD
+		var cosString = Math.round(cos * 100) / 100;
+		if (!cosString.toString().includes("-"))
+			cosString = "&nbsp;" + cosString;
+		var sinString = Math.round(sin * 100) / 100;
+		if (!sinString.toString().includes("-"))
+			sinString = "&nbsp;" + sinString;
+		document.getElementById("HUD").innerHTML = "<tr><td>Winkel</td><td>" + "&nbsp;" + angle + 
+		"</td></tr><tr><td>Kosinus</td><td style='color:red'>" + cosString + 
+		"</td></tr><tr><td>Sinus</td><td style='color:blue'>" + sinString + "</td></tr>";
+		
+		angle++;
+		if (angle == 360)
+		{
+			angle = 0; // Rollover
+			ctx.clearRect(wavesRec.x, wavesRec.y, wavesRec.width, wavesRec.height + ctx.lineWidth); // Clear waves
+		}
+	}
+</script>
+</body>
